@@ -21,6 +21,11 @@ def svg(grid, cols):
 
 html = open("template.html").read()
 html = html.replace("__SPONGE__", open("sponge.svg").read().replace("<svg ", '<svg aria-hidden="true" ', 1))
+import random
+_r = random.Random(7)
+GRASS = ["".join("1" if y < 3 or (y == 3 and _r.random() < .5) else _r.choice("2223") for x in range(16)) for y in range(16)]
+GRASS_COLS = {"1": "#5fae3c", "2": "#866043", "3": "#6b4a30"}
+html = html.replace("__GRASS__", svg(GRASS, GRASS_COLS))
 html = html.replace("__PICKAXE__", svg(PICK, PICK_COLS)).replace("__EMERALD__", svg(EMERALD, EM_COLS))
 open("index.html", "w").write(html)
 

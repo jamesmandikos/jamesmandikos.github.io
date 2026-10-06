@@ -46,7 +46,7 @@
   main {
     position: relative; flex: 1;
     width: 100%; max-width: 980px; margin: 0 auto; padding: 10px 16px 28px;
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-content: start;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; align-content: start; max-width: 760px;
   }
 
   .tile {
@@ -77,6 +77,8 @@
   .spell .go { background: #ffd700; }
   .tables { background: linear-gradient(180deg, #3a4a3a 0%, #2e3b2e 100%); border-color: #121812; }
   .tables .go { background: #5fae3c; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,.35); }
+  .blocks { background: linear-gradient(180deg, #6b4a2b 0%, #4a3320 100%); border-color: #2a1c10; }
+  .blocks .go { background: #5fae3c; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,.35); }
   .quest { background: linear-gradient(180deg, #2a2620 0%, #1d1a17 100%); border-color: #0e0c0a; }
   .quest .go { background: #17dd62; }
 
@@ -125,8 +127,15 @@
     <a class="tile tables" href="/spelling-quest/tables/">
       <div class="art pixel">__PICKAXE__</div>
       <h2>Times Table Miner</h2>
-      <p>Mine your times tables. 10 minutes a day earns an emerald.</p>
+      <p>Mine your times tables. 10 minutes a day earns an emerald and unlocks play time.</p>
       <span class="go">Mine</span>
+    </a>
+
+    <a class="tile blocks" href="/spelling-quest/blocks/">
+      <div class="art pixel">__GRASS__</div>
+      <h2>Block World</h2>
+      <p>Mine, craft and build your own world. Unlocks after times tables.</p>
+      <span class="go">Build</span>
     </a>
 
     <a class="tile quest" href="/ava-emerald-quest/">
