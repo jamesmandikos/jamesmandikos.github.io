@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ava's Games</title>
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#1d1a17" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Ava's Games" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
+<style>
+  :root {
+    --sky1: #4aa3df; --sky2: #9fd6f5; --grass: #5fae3c; --grass-dk: #3f7f26;
+    --dirt: #8b5a2b; --dirt-dk: #6b4220; --text: #fff; --ink: #1b1b1b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Trebuchet MS", system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background:
+      linear-gradient(180deg, var(--sky1) 0%, var(--sky2) 55%, var(--sky2) 100%);
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) 0 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* blocky clouds */
+  .clouds { position: absolute; inset: 0 0 auto 0; height: 220px; pointer-events: none; overflow: hidden; }
+  .cloud { position: absolute; background: #fff; opacity: .9; box-shadow: 24px 0 0 #fff, 48px 0 0 #fff, 24px -16px 0 #fff; width: 24px; height: 16px; }
+  .cloud.c1 { top: 46px; left: 8%; transform: scale(2); }
+  .cloud.c2 { top: 110px; right: 22%; transform: scale(1.4); opacity: .75; }
+  .cloud.c3 { top: 30px; right: 6%; transform: scale(1.7); opacity: .85; }
+
+  header { position: relative; text-align: center; padding: 34px 16px 18px; }
+  h1 {
+    margin: 0; font-size: clamp(34px, 9vw, 56px); letter-spacing: 1px; line-height: 1.05;
+    text-shadow: 3px 3px 0 #2a5d86, 6px 6px 0 rgba(0,0,0,.15);
+  }
+  .hello { margin: 10px 0 0; font-size: clamp(17px, 4.4vw, 21px); font-weight: bold; color: #0f3d5e; }
+
+  main {
+    position: relative; flex: 1;
+    width: 100%; max-width: 980px; margin: 0 auto; padding: 10px 16px 28px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-content: start;
+  }
+
+  .tile {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    text-decoration: none; color: var(--text);
+    border-radius: 18px; padding: 22px 18px 20px;
+    border: 4px solid rgba(0,0,0,.25);
+    box-shadow: 0 6px 0 rgba(0,0,0,.28), 0 12px 24px rgba(0,0,0,.18);
+    transition: transform .12s ease, box-shadow .12s ease;
+    position: relative; overflow: hidden;
+  }
+  .tile:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 6px 12px rgba(0,0,0,.18); }
+  @media (hover: hover) { .tile:hover { transform: translateY(-3px); } }
+  .tile:focus-visible { outline: 4px solid #fff; outline-offset: 3px; }
+
+  .art { width: 104px; height: 104px; display: grid; place-items: center; margin-bottom: 12px; }
+  .art svg { width: 100%; height: 100%; display: block; }
+  .art.pixel svg { image-rendering: pixelated; shape-rendering: crispEdges; }
+  .tile h2 { margin: 0 0 6px; font-size: 26px; line-height: 1.1; text-shadow: 2px 2px 0 rgba(0,0,0,.3); }
+  .tile p { margin: 0 0 16px; font-size: 16px; line-height: 1.35; opacity: .95; }
+  .go {
+    margin-top: auto; display: inline-block; padding: 10px 26px; border-radius: 12px;
+    font-weight: bold; font-size: 19px; color: var(--ink);
+    box-shadow: 0 4px 0 rgba(0,0,0,.3);
+  }
+
+  .spell { background: linear-gradient(180deg, #0a6e96 0%, #1488b8 45%, #4aaed4 100%); }
+  .spell .go { background: #ffd700; }
+  .tables { background: linear-gradient(180deg, #3a4a3a 0%, #2e3b2e 100%); border-color: #121812; }
+  .tables .go { background: #5fae3c; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,.35); }
+  .quest { background: linear-gradient(180deg, #2a2620 0%, #1d1a17 100%); border-color: #0e0c0a; }
+  .quest .go { background: #17dd62; }
+
+  /* grass + dirt ground strip */
+  footer { position: relative; height: 64px; margin-top: auto;
+    background:
+      linear-gradient(180deg, var(--grass) 0 14px, var(--grass-dk) 14px 20px, var(--dirt) 20px 100%);
+  }
+  footer::after { content: ""; position: absolute; inset: 20px 0 0 0;
+    background-image:
+      linear-gradient(90deg, var(--dirt-dk) 0 12px, transparent 12px 40px),
+      linear-gradient(90deg, transparent 0 22px, var(--dirt-dk) 22px 30px, transparent 30px 52px);
+    background-size: 64px 10px, 52px 10px; background-position: 0 6px, 10px 24px; background-repeat: repeat-x; opacity: .55;
+  }
+  @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; max-width: 520px; gap: 14px; }
+    .tile { display: grid; grid-template-columns: 76px 1fr; column-gap: 14px; text-align: left; align-items: center; padding: 16px; }
+    .tile .art { width: 76px; height: 76px; margin: 0; grid-row: 1 / span 3; }
+    .tile h2 { font-size: 22px; }
+    .tile p { font-size: 15px; margin-bottom: 10px; }
+    .go { justify-self: start; padding: 7px 20px; font-size: 17px; }
+    .cloud.c1 { top: 14px; left: 4%; transform: scale(1.2); }
+    .cloud.c2 { display: none; }
+    .cloud.c3 { top: 118px; right: 4%; transform: scale(1); opacity: .6; }
+    header { padding-top: 40px; }
+  }
+</style>
+</head>
+<body>
+  <div class="clouds" aria-hidden="true"><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div></div>
+
+  <header>
+    <h1>Ava's Games</h1>
+    <p class="hello" id="hello">Pick a game!</p>
+  </header>
+
+  <main>
+    <a class="tile spell" href="/spelling-quest/">
+      <div class="art"><svg aria-hidden="true" width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><rect x="18" y="28" width="60" height="58" rx="10" fill="#FFD700"/><rect x="18" y="68" width="60" height="18" rx="6" fill="#8B4513"/><rect x="18" y="64" width="60" height="6" fill="#5C3317"/><rect x="44" y="61" width="8" height="12" rx="2" fill="#C0A030"/><rect x="30" y="55" width="36" height="14" rx="3" fill="#fff"/><polygon points="36,55 48,65 60,55" fill="#fff"/><polygon points="44,56 52,56 50,70 48,72 46,70" fill="#FF4444"/><ellipse cx="36" cy="42" rx="8" ry="9" fill="#fff"/><ellipse cx="60" cy="42" rx="8" ry="9" fill="#fff"/><circle cx="37" cy="43" r="4" fill="#6699CC"/><circle cx="61" cy="43" r="4" fill="#6699CC"/><circle cx="38" cy="42" r="2" fill="#000"/><circle cx="62" cy="42" r="2" fill="#000"/><circle cx="39" cy="41" r="1" fill="#fff"/><circle cx="63" cy="41" r="1" fill="#fff"/><line x1="28" y1="34" x2="30" y2="37" stroke="#000" stroke-width="1.5"/><line x1="33" y1="32" x2="34" y2="35" stroke="#000" stroke-width="1.5"/><line x1="38" y1="32" x2="38" y2="35" stroke="#000" stroke-width="1.5"/><line x1="58" y1="32" x2="58" y2="35" stroke="#000" stroke-width="1.5"/><line x1="63" y1="32" x2="62" y2="35" stroke="#000" stroke-width="1.5"/><line x1="68" y1="34" x2="66" y2="37" stroke="#000" stroke-width="1.5"/><ellipse cx="48" cy="50" rx="3" ry="2" fill="#E8A000"/><path d="M34 56 Q48 68 62 56" stroke="#000" stroke-width="2" fill="none"/><rect x="40" y="56" width="7" height="6" rx="1" fill="#fff" stroke="#ccc" stroke-width=".5"/><rect x="48" y="56" width="7" height="6" rx="1" fill="#fff" stroke="#ccc" stroke-width=".5"/><circle cx="26" cy="54" r="5" fill="rgba(255,100,100,0.25)"/><circle cx="70" cy="54" r="5" fill="rgba(255,100,100,0.25)"/><circle cx="28" cy="38" r="2" fill="rgba(0,0,0,0.08)"/><circle cx="52" cy="32" r="1.5" fill="rgba(0,0,0,0.08)"/><circle cx="68" cy="40" r="2" fill="rgba(0,0,0,0.08)"/><rect x="4" y="45" width="14" height="7" rx="4" fill="#FFD700" transform="rotate(-20,4,45)"/><rect x="78" y="45" width="14" height="7" rx="4" fill="#FFD700" transform="rotate(20,92,45)"/><rect x="24" y="84" width="16" height="8" rx="3" fill="#1A1A1A"/><rect x="56" y="84" width="16" height="8" rx="3" fill="#1A1A1A"/></svg>
+</div>
+      <h2>Spelling Quest</h2>
+      <p>Spell your way round Bikini Bottom and collect Krabby Patties.</p>
+      <span class="go">Play</span>
+    </a>
+
+    <a class="tile tables" href="/spelling-quest/tables/">
+      <div class="art pixel"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><rect x="4" y="1" width="1" height="1" fill="#2a9d93"/><rect x="5" y="1" width="1" height="1" fill="#2a9d93"/><rect x="6" y="1" width="1" height="1" fill="#2a9d93"/><rect x="7" y="1" width="1" height="1" fill="#2a9d93"/><rect x="8" y="1" width="1" height="1" fill="#2a9d93"/><rect x="9" y="1" width="1" height="1" fill="#2a9d93"/><rect x="10" y="1" width="1" height="1" fill="#2a9d93"/><rect x="3" y="2" width="1" height="1" fill="#2a9d93"/><rect x="4" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="5" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="6" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="7" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="8" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="9" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="10" y="2" width="1" height="1" fill="#7ff0e6"/><rect x="11" y="2" width="1" height="1" fill="#2a9d93"/><rect x="4" y="3" width="1" height="1" fill="#2a9d93"/><rect x="5" y="3" width="1" height="1" fill="#2a9d93"/><rect x="6" y="3" width="1" height="1" fill="#2a9d93"/><rect x="7" y="3" width="1" height="1" fill="#2a9d93"/><rect x="8" y="3" width="1" height="1" fill="#2a9d93"/><rect x="9" y="3" width="1" height="1" fill="#7ff0e6"/><rect x="10" y="3" width="1" height="1" fill="#7ff0e6"/><rect x="11" y="3" width="1" height="1" fill="#7ff0e6"/><rect x="12" y="3" width="1" height="1" fill="#2a9d93"/><rect x="8" y="4" width="1" height="1" fill="#a0703c"/><rect x="9" y="4" width="1" height="1" fill="#5e3f1e"/><rect x="10" y="4" width="1" height="1" fill="#2a9d93"/><rect x="11" y="4" width="1" height="1" fill="#7ff0e6"/><rect x="12" y="4" width="1" height="1" fill="#7ff0e6"/><rect x="13" y="4" width="1" height="1" fill="#2a9d93"/><rect x="7" y="5" width="1" height="1" fill="#a0703c"/><rect x="8" y="5" width="1" height="1" fill="#5e3f1e"/><rect x="9" y="5" width="1" height="1" fill="#a0703c"/><rect x="11" y="5" width="1" height="1" fill="#2a9d93"/><rect x="12" y="5" width="1" height="1" fill="#7ff0e6"/><rect x="13" y="5" width="1" height="1" fill="#2a9d93"/><rect x="6" y="6" width="1" height="1" fill="#a0703c"/><rect x="7" y="6" width="1" height="1" fill="#5e3f1e"/><rect x="8" y="6" width="1" height="1" fill="#a0703c"/><rect x="11" y="6" width="1" height="1" fill="#2a9d93"/><rect x="12" y="6" width="1" height="1" fill="#7ff0e6"/><rect x="13" y="6" width="1" height="1" fill="#2a9d93"/><rect x="5" y="7" width="1" height="1" fill="#a0703c"/><rect x="6" y="7" width="1" height="1" fill="#5e3f1e"/><rect x="7" y="7" width="1" height="1" fill="#a0703c"/><rect x="12" y="7" width="1" height="1" fill="#2a9d93"/><rect x="4" y="8" width="1" height="1" fill="#a0703c"/><rect x="5" y="8" width="1" height="1" fill="#5e3f1e"/><rect x="6" y="8" width="1" height="1" fill="#a0703c"/><rect x="3" y="9" width="1" height="1" fill="#a0703c"/><rect x="4" y="9" width="1" height="1" fill="#5e3f1e"/><rect x="5" y="9" width="1" height="1" fill="#a0703c"/><rect x="2" y="10" width="1" height="1" fill="#a0703c"/><rect x="3" y="10" width="1" height="1" fill="#5e3f1e"/><rect x="4" y="10" width="1" height="1" fill="#a0703c"/><rect x="1" y="11" width="1" height="1" fill="#a0703c"/><rect x="2" y="11" width="1" height="1" fill="#5e3f1e"/><rect x="3" y="11" width="1" height="1" fill="#a0703c"/><rect x="0" y="12" width="1" height="1" fill="#a0703c"/><rect x="1" y="12" width="1" height="1" fill="#5e3f1e"/><rect x="2" y="12" width="1" height="1" fill="#a0703c"/><rect x="0" y="13" width="1" height="1" fill="#5e3f1e"/><rect x="1" y="13" width="1" height="1" fill="#a0703c"/></svg></div>
+      <h2>Times Table Miner</h2>
+      <p>Mine your times tables. 10 minutes a day earns an emerald.</p>
+      <span class="go">Mine</span>
+    </a>
+
+    <a class="tile quest" href="/ava-emerald-quest/">
+      <div class="art pixel"><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true"><rect x="5" y="1" width="1" height="1" fill="#148250"/><rect x="6" y="1" width="1" height="1" fill="#148250"/><rect x="7" y="1" width="1" height="1" fill="#148250"/><rect x="8" y="1" width="1" height="1" fill="#148250"/><rect x="9" y="1" width="1" height="1" fill="#148250"/><rect x="4" y="2" width="1" height="1" fill="#148250"/><rect x="5" y="2" width="1" height="1" fill="#6ef096"/><rect x="6" y="2" width="1" height="1" fill="#6ef096"/><rect x="7" y="2" width="1" height="1" fill="#6ef096"/><rect x="8" y="2" width="1" height="1" fill="#6ef096"/><rect x="9" y="2" width="1" height="1" fill="#6ef096"/><rect x="10" y="2" width="1" height="1" fill="#148250"/><rect x="3" y="3" width="1" height="1" fill="#148250"/><rect x="4" y="3" width="1" height="1" fill="#6ef096"/><rect x="5" y="3" width="1" height="1" fill="#6ef096"/><rect x="6" y="3" width="1" height="1" fill="#6ef096"/><rect x="7" y="3" width="1" height="1" fill="#6ef096"/><rect x="8" y="3" width="1" height="1" fill="#6ef096"/><rect x="9" y="3" width="1" height="1" fill="#6ef096"/><rect x="10" y="3" width="1" height="1" fill="#6ef096"/><rect x="11" y="3" width="1" height="1" fill="#148250"/><rect x="2" y="4" width="1" height="1" fill="#148250"/><rect x="3" y="4" width="1" height="1" fill="#6ef096"/><rect x="4" y="4" width="1" height="1" fill="#6ef096"/><rect x="5" y="4" width="1" height="1" fill="#6ef096"/><rect x="6" y="4" width="1" height="1" fill="#6ef096"/><rect x="7" y="4" width="1" height="1" fill="#6ef096"/><rect x="8" y="4" width="1" height="1" fill="#6ef096"/><rect x="9" y="4" width="1" height="1" fill="#6ef096"/><rect x="10" y="4" width="1" height="1" fill="#6ef096"/><rect x="11" y="4" width="1" height="1" fill="#6ef096"/><rect x="12" y="4" width="1" height="1" fill="#148250"/><rect x="1" y="5" width="1" height="1" fill="#148250"/><rect x="2" y="5" width="1" height="1" fill="#6ef096"/><rect x="3" y="5" width="1" height="1" fill="#6ef096"/><rect x="4" y="5" width="1" height="1" fill="#6ef096"/><rect x="5" y="5" width="1" height="1" fill="#6ef096"/><rect x="6" y="5" width="1" height="1" fill="#6ef096"/><rect x="7" y="5" width="1" height="1" fill="#6ef096"/><rect x="8" y="5" width="1" height="1" fill="#6ef096"/><rect x="9" y="5" width="1" height="1" fill="#6ef096"/><rect x="10" y="5" width="1" height="1" fill="#6ef096"/><rect x="11" y="5" width="1" height="1" fill="#6ef096"/><rect x="12" y="5" width="1" height="1" fill="#6ef096"/><rect x="13" y="5" width="1" height="1" fill="#148250"/><rect x="1" y="6" width="1" height="1" fill="#148250"/><rect x="2" y="6" width="1" height="1" fill="#6ef096"/><rect x="3" y="6" width="1" height="1" fill="#6ef096"/><rect x="4" y="6" width="1" height="1" fill="#6ef096"/><rect x="5" y="6" width="1" height="1" fill="#6ef096"/><rect x="6" y="6" width="1" height="1" fill="#148250"/><rect x="7" y="6" width="1" height="1" fill="#148250"/><rect x="8" y="6" width="1" height="1" fill="#6ef096"/><rect x="9" y="6" width="1" height="1" fill="#6ef096"/><rect x="10" y="6" width="1" height="1" fill="#6ef096"/><rect x="11" y="6" width="1" height="1" fill="#6ef096"/><rect x="12" y="6" width="1" height="1" fill="#6ef096"/><rect x="13" y="6" width="1" height="1" fill="#148250"/><rect x="1" y="7" width="1" height="1" fill="#148250"/><rect x="2" y="7" width="1" height="1" fill="#6ef096"/><rect x="3" y="7" width="1" height="1" fill="#6ef096"/><rect x="4" y="7" width="1" height="1" fill="#6ef096"/><rect x="5" y="7" width="1" height="1" fill="#148250"/><rect x="6" y="7" width="1" height="1" fill="#148250"/><rect x="7" y="7" width="1" height="1" fill="#6ef096"/><rect x="8" y="7" width="1" height="1" fill="#6ef096"/><rect x="9" y="7" width="1" height="1" fill="#148250"/><rect x="10" y="7" width="1" height="1" fill="#6ef096"/><rect x="11" y="7" width="1" height="1" fill="#6ef096"/><rect x="12" y="7" width="1" height="1" fill="#6ef096"/><rect x="13" y="7" width="1" height="1" fill="#148250"/><rect x="1" y="8" width="1" height="1" fill="#148250"/><rect x="2" y="8" width="1" height="1" fill="#6ef096"/><rect x="3" y="8" width="1" height="1" fill="#6ef096"/><rect x="4" y="8" width="1" height="1" fill="#148250"/><rect x="5" y="8" width="1" height="1" fill="#148250"/><rect x="6" y="8" width="1" height="1" fill="#6ef096"/><rect x="7" y="8" width="1" height="1" fill="#6ef096"/><rect x="8" y="8" width="1" height="1" fill="#148250"/><rect x="9" y="8" width="1" height="1" fill="#6ef096"/><rect x="10" y="8" width="1" height="1" fill="#6ef096"/><rect x="11" y="8" width="1" height="1" fill="#6ef096"/><rect x="12" y="8" width="1" height="1" fill="#6ef096"/><rect x="13" y="8" width="1" height="1" fill="#148250"/><rect x="1" y="9" width="1" height="1" fill="#148250"/><rect x="2" y="9" width="1" height="1" fill="#6ef096"/><rect x="3" y="9" width="1" height="1" fill="#6ef096"/><rect x="4" y="9" width="1" height="1" fill="#148250"/><rect x="5" y="9" width="1" height="1" fill="#6ef096"/><rect x="6" y="9" width="1" height="1" fill="#6ef096"/><rect x="7" y="9" width="1" height="1" fill="#148250"/><rect x="8" y="9" width="1" height="1" fill="#148250"/><rect x="9" y="9" width="1" height="1" fill="#6ef096"/><rect x="10" y="9" width="1" height="1" fill="#6ef096"/><rect x="11" y="9" width="1" height="1" fill="#6ef096"/><rect x="12" y="9" width="1" height="1" fill="#6ef096"/><rect x="13" y="9" width="1" height="1" fill="#148250"/><rect x="1" y="10" width="1" height="1" fill="#148250"/><rect x="2" y="10" width="1" height="1" fill="#6ef096"/><rect x="3" y="10" width="1" height="1" fill="#6ef096"/><rect x="4" y="10" width="1" height="1" fill="#6ef096"/><rect x="5" y="10" width="1" height="1" fill="#148250"/><rect x="6" y="10" width="1" height="1" fill="#148250"/><rect x="7" y="10" width="1" height="1" fill="#6ef096"/><rect x="8" y="10" width="1" height="1" fill="#6ef096"/><rect x="9" y="10" width="1" height="1" fill="#148250"/><rect x="10" y="10" width="1" height="1" fill="#6ef096"/><rect x="11" y="10" width="1" height="1" fill="#6ef096"/><rect x="12" y="10" width="1" height="1" fill="#6ef096"/><rect x="13" y="10" width="1" height="1" fill="#148250"/><rect x="2" y="11" width="1" height="1" fill="#148250"/><rect x="3" y="11" width="1" height="1" fill="#6ef096"/><rect x="4" y="11" width="1" height="1" fill="#6ef096"/><rect x="5" y="11" width="1" height="1" fill="#148250"/><rect x="6" y="11" width="1" height="1" fill="#6ef096"/><rect x="7" y="11" width="1" height="1" fill="#6ef096"/><rect x="8" y="11" width="1" height="1" fill="#148250"/><rect x="9" y="11" width="1" height="1" fill="#6ef096"/><rect x="10" y="11" width="1" height="1" fill="#6ef096"/><rect x="11" y="11" width="1" height="1" fill="#148250"/><rect x="3" y="12" width="1" height="1" fill="#148250"/><rect x="4" y="12" width="1" height="1" fill="#6ef096"/><rect x="5" y="12" width="1" height="1" fill="#6ef096"/><rect x="6" y="12" width="1" height="1" fill="#148250"/><rect x="7" y="12" width="1" height="1" fill="#6ef096"/><rect x="8" y="12" width="1" height="1" fill="#6ef096"/><rect x="9" y="12" width="1" height="1" fill="#148250"/><rect x="10" y="12" width="1" height="1" fill="#6ef096"/><rect x="11" y="12" width="1" height="1" fill="#148250"/><rect x="4" y="13" width="1" height="1" fill="#148250"/><rect x="5" y="13" width="1" height="1" fill="#6ef096"/><rect x="6" y="13" width="1" height="1" fill="#6ef096"/><rect x="7" y="13" width="1" height="1" fill="#6ef096"/><rect x="8" y="13" width="1" height="1" fill="#6ef096"/><rect x="9" y="13" width="1" height="1" fill="#148250"/><rect x="5" y="14" width="1" height="1" fill="#148250"/><rect x="6" y="14" width="1" height="1" fill="#148250"/><rect x="7" y="14" width="1" height="1" fill="#148250"/><rect x="8" y="14" width="1" height="1" fill="#148250"/></svg></div>
+      <h2>Emerald Quest</h2>
+      <p>See your emeralds, grow your cat and pick a reward.</p>
+      <span class="go">Open</span>
+    </a>
+  </main>
+
+  <footer aria-hidden="true"></footer>
+
+<script>
+  // A friendly greeting that changes with the time of day.
+  (function () {
+    var h = new Date().getHours();
+    var msg = h < 12 ? "Good morning, Ava! Pick a game." : h < 17 ? "Good afternoon, Ava! Pick a game." : "Good evening, Ava! Pick a game.";
+    document.getElementById("hello").textContent = msg;
+  })();
+</script>
+</body>
+</html>

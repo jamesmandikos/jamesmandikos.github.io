@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ava's Games</title>
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#1d1a17" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Ava's Games" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
+<style>
+  :root {
+    --sky1: #4aa3df; --sky2: #9fd6f5; --grass: #5fae3c; --grass-dk: #3f7f26;
+    --dirt: #8b5a2b; --dirt-dk: #6b4220; --text: #fff; --ink: #1b1b1b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Trebuchet MS", system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background:
+      linear-gradient(180deg, var(--sky1) 0%, var(--sky2) 55%, var(--sky2) 100%);
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column;
+    padding: env(safe-area-inset-top) 0 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* blocky clouds */
+  .clouds { position: absolute; inset: 0 0 auto 0; height: 220px; pointer-events: none; overflow: hidden; }
+  .cloud { position: absolute; background: #fff; opacity: .9; box-shadow: 24px 0 0 #fff, 48px 0 0 #fff, 24px -16px 0 #fff; width: 24px; height: 16px; }
+  .cloud.c1 { top: 46px; left: 8%; transform: scale(2); }
+  .cloud.c2 { top: 110px; right: 22%; transform: scale(1.4); opacity: .75; }
+  .cloud.c3 { top: 30px; right: 6%; transform: scale(1.7); opacity: .85; }
+
+  header { position: relative; text-align: center; padding: 34px 16px 18px; }
+  h1 {
+    margin: 0; font-size: clamp(34px, 9vw, 56px); letter-spacing: 1px; line-height: 1.05;
+    text-shadow: 3px 3px 0 #2a5d86, 6px 6px 0 rgba(0,0,0,.15);
+  }
+  .hello { margin: 10px 0 0; font-size: clamp(17px, 4.4vw, 21px); font-weight: bold; color: #0f3d5e; }
+
+  main {
+    position: relative; flex: 1;
+    width: 100%; max-width: 980px; margin: 0 auto; padding: 10px 16px 28px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-content: start;
+  }
+
+  .tile {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    text-decoration: none; color: var(--text);
+    border-radius: 18px; padding: 22px 18px 20px;
+    border: 4px solid rgba(0,0,0,.25);
+    box-shadow: 0 6px 0 rgba(0,0,0,.28), 0 12px 24px rgba(0,0,0,.18);
+    transition: transform .12s ease, box-shadow .12s ease;
+    position: relative; overflow: hidden;
+  }
+  .tile:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,.28), 0 6px 12px rgba(0,0,0,.18); }
+  @media (hover: hover) { .tile:hover { transform: translateY(-3px); } }
+  .tile:focus-visible { outline: 4px solid #fff; outline-offset: 3px; }
+
+  .art { width: 104px; height: 104px; display: grid; place-items: center; margin-bottom: 12px; }
+  .art svg { width: 100%; height: 100%; display: block; }
+  .art.pixel svg { image-rendering: pixelated; shape-rendering: crispEdges; }
+  .tile h2 { margin: 0 0 6px; font-size: 26px; line-height: 1.1; text-shadow: 2px 2px 0 rgba(0,0,0,.3); }
+  .tile p { margin: 0 0 16px; font-size: 16px; line-height: 1.35; opacity: .95; }
+  .go {
+    margin-top: auto; display: inline-block; padding: 10px 26px; border-radius: 12px;
+    font-weight: bold; font-size: 19px; color: var(--ink);
+    box-shadow: 0 4px 0 rgba(0,0,0,.3);
+  }
+
+  .spell { background: linear-gradient(180deg, #0a6e96 0%, #1488b8 45%, #4aaed4 100%); }
+  .spell .go { background: #ffd700; }
+  .tables { background: linear-gradient(180deg, #3a4a3a 0%, #2e3b2e 100%); border-color: #121812; }
+  .tables .go { background: #5fae3c; color: #fff; text-shadow: 1px 1px 0 rgba(0,0,0,.35); }
+  .quest { background: linear-gradient(180deg, #2a2620 0%, #1d1a17 100%); border-color: #0e0c0a; }
+  .quest .go { background: #17dd62; }
+
+  /* grass + dirt ground strip */
+  footer { position: relative; height: 64px; margin-top: auto;
+    background:
+      linear-gradient(180deg, var(--grass) 0 14px, var(--grass-dk) 14px 20px, var(--dirt) 20px 100%);
+  }
+  footer::after { content: ""; position: absolute; inset: 20px 0 0 0;
+    background-image:
+      linear-gradient(90deg, var(--dirt-dk) 0 12px, transparent 12px 40px),
+      linear-gradient(90deg, transparent 0 22px, var(--dirt-dk) 22px 30px, transparent 30px 52px);
+    background-size: 64px 10px, 52px 10px; background-position: 0 6px, 10px 24px; background-repeat: repeat-x; opacity: .55;
+  }
+  @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+  @media (max-width: 760px) {
+    main { grid-template-columns: 1fr; max-width: 520px; gap: 14px; }
+    .tile { display: grid; grid-template-columns: 76px 1fr; column-gap: 14px; text-align: left; align-items: center; padding: 16px; }
+    .tile .art { width: 76px; height: 76px; margin: 0; grid-row: 1 / span 3; }
+    .tile h2 { font-size: 22px; }
+    .tile p { font-size: 15px; margin-bottom: 10px; }
+    .go { justify-self: start; padding: 7px 20px; font-size: 17px; }
+    .cloud.c1 { top: 14px; left: 4%; transform: scale(1.2); }
+    .cloud.c2 { display: none; }
+    .cloud.c3 { top: 118px; right: 4%; transform: scale(1); opacity: .6; }
+    header { padding-top: 40px; }
+  }
+</style>
+</head>
+<body>
+  <div class="clouds" aria-hidden="true"><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div></div>
+
+  <header>
+    <h1>Ava's Games</h1>
+    <p class="hello" id="hello">Pick a game!</p>
+  </header>
+
+  <main>
+    <a class="tile spell" href="/spelling-quest/">
+      <div class="art">__SPONGE__</div>
+      <h2>Spelling Quest</h2>
+      <p>Spell your way round Bikini Bottom and collect Krabby Patties.</p>
+      <span class="go">Play</span>
+    </a>
+
+    <a class="tile tables" href="/spelling-quest/tables/">
+      <div class="art pixel">__PICKAXE__</div>
+      <h2>Times Table Miner</h2>
+      <p>Mine your times tables. 10 minutes a day earns an emerald.</p>
+      <span class="go">Mine</span>
+    </a>
+
+    <a class="tile quest" href="/ava-emerald-quest/">
+      <div class="art pixel">__EMERALD__</div>
+      <h2>Emerald Quest</h2>
+      <p>See your emeralds, grow your cat and pick a reward.</p>
+      <span class="go">Open</span>
+    </a>
+  </main>
+
+  <footer aria-hidden="true"></footer>
+
+<script>
+  // A friendly greeting that changes with the time of day.
+  (function () {
+    var h = new Date().getHours();
+    var msg = h < 12 ? "Good morning, Ava! Pick a game." : h < 17 ? "Good afternoon, Ava! Pick a game." : "Good evening, Ava! Pick a game.";
+    document.getElementById("hello").textContent = msg;
+  })();
+</script>
+</body>
+</html>
