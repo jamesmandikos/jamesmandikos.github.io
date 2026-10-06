@@ -93,6 +93,15 @@
       linear-gradient(90deg, transparent 0 22px, var(--dirt-dk) 22px 30px, transparent 30px 52px);
     background-size: 64px 10px, 52px 10px; background-position: 0 6px, 10px 24px; background-repeat: repeat-x; opacity: .55;
   }
+  /* Games open inside the hub, so the installed home-screen app never navigates away
+     (iOS drops out of app mode into the browser when a standalone app follows a link). */
+  #shell { position: fixed; inset: 0; z-index: 50; background: #15130f; display: flex; flex-direction: column; }
+  #shell[hidden] { display: none; }
+  #bar { flex: none; display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top) + 4px) max(10px, env(safe-area-inset-right)) 4px max(10px, env(safe-area-inset-left)); background: #1d1a17; border-bottom: 2px solid #000; }
+  #homeBtn { font: bold 16px "Trebuchet MS", system-ui, sans-serif; color: #fff; background: #3f7f26; border: 2px solid #000; border-radius: 10px; padding: 6px 12px; cursor: pointer; }
+  #gameName { color: #fff; font-weight: bold; font-size: 16px; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #game { flex: 1; width: 100%; border: 0; display: block; background: #000; padding-bottom: env(safe-area-inset-bottom); }
+  body.playing { overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
   @media (max-width: 760px) {
     main { grid-template-columns: 1fr; max-width: 520px; gap: 14px; }
@@ -147,9 +156,50 @@
     </a>
   </main>
 
+  <div id="shell" hidden>
+    <div id="bar"><button id="homeBtn" type="button">🏠 All games</button><span id="gameName"></span></div>
+    <iframe id="game" title="Game" allow="autoplay; fullscreen"></iframe>
+  </div>
+
   <footer aria-hidden="true"></footer>
 
 <script>
+  // Open each game inside this page instead of following the link. The address stays the
+  // hub's, so a home-screen install stays in app mode. The #game=... hash lets a reload
+  // (iOS sometimes reloads a resumed app) reopen the same game. No pushState: an iframe's
+  // own page loads share the browser history, so "back" would wander inside the game.
+  (function () {
+    var shell = document.getElementById("shell"), nameEl = document.getElementById("gameName");
+    function frame() { return document.getElementById("game"); }
+    function open(path, name) {
+      // a fresh iframe each time, so opening a game never adds history entries
+      var f = document.createElement("iframe");
+      f.id = "game"; f.title = name || "Game"; f.setAttribute("allow", "autoplay; fullscreen"); f.src = path;
+      f.addEventListener("load", function () {
+        // a game's own "All games" link (href="/") would load the hub inside the frame
+        try { var p = f.contentWindow.location.pathname; if (p === "/" || p === "/index.html") close(); } catch (err) {}
+      });
+      frame().replaceWith(f);
+      nameEl.textContent = name || "";
+      shell.hidden = false; document.body.classList.add("playing");
+      history.replaceState(null, "", "#game=" + encodeURIComponent(path));
+    }
+    function close() {
+      shell.hidden = true; document.body.classList.remove("playing");
+      var f = document.createElement("iframe"); f.id = "game"; f.title = "Game"; frame().replaceWith(f);
+      history.replaceState(null, "", location.pathname);
+    }
+    document.querySelectorAll("a.tile").forEach(function (a) {
+      a.addEventListener("click", function (e) { e.preventDefault(); open(a.getAttribute("href"), a.querySelector("h2").textContent); });
+    });
+    document.getElementById("homeBtn").addEventListener("click", close);
+    var m = location.hash.match(/^#game=(.+)$/);
+    if (m) {
+      var path = decodeURIComponent(m[1]), tile = document.querySelector('a.tile[href="' + path + '"]');
+      if (tile) open(path, tile.querySelector("h2").textContent);
+    }
+  })();
+
   // A friendly greeting that changes with the time of day.
   (function () {
     var h = new Date().getHours();
